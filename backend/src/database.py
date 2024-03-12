@@ -7,12 +7,9 @@ from langchain.docstore.document import Document as LangchainDocument
 from tqdm import tqdm
 import pandas as pd
 import matplotlib.pyplot as plt
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 from langchain_community.vectorstores.utils import DistanceStrategy
 from langchain_community.embeddings import HuggingFaceEmbeddings
-import pacmap
-import numpy as np
-import plotly.express as px
 
 
 def split_documents(
@@ -73,11 +70,14 @@ def get_knowledge_base(embedding_model: HuggingFaceEmbeddings, dataset):
     raw_knowledge_base = [
         LangchainDocument(page_content=doc["text"], metadata={"source": doc["source"]}) for doc in tqdm(dataset)
     ]
+    #raw_knowledge_base = raw_knowledge_base[:10]
+    print("Splitting Documents")
     docs_processed = split_documents(
-        512,  # We choose a chunk size adapted to our model
+        256,  # We choose a chunk size adapted to our model
         raw_knowledge_base,
         tokenizer_name=EMBEDDING_MODEL_NAME,
     )
+    print("Generating Embeddings")
     return FAISS.from_documents(
         docs_processed, embedding_model, distance_strategy=DistanceStrategy.COSINE
     )
