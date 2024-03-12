@@ -1,0 +1,31 @@
+<div class="chatWindow">
+    <div class="header">
+      <p>Interactive Q&A</p>
+    </div>
+    <div class="chat">
+        @for(msg of messages; track msg.id){
+            <p class="content-owner" [ngStyle]="{'align-self': (msg.src==botName) ? 'start' : 'end'}">
+              <mat-icon [inline]="'true'">
+                @if(msg.src==botName){
+                  adb
+                } @else {
+                  person
+                }
+              </mat-icon>
+              {{msg.src}}
+            </p>
+            <p [ngStyle]="{'align-self': (msg.src==botName) ? 'start' : 'end'}" class="message">{{msg.msg}}</p>
+        }
+    </div>
+    <div class="input-container">
+        <mat-form-field class="input-field">
+          <div class="highlight">
+            <textarea placeholder="Type your message here" [formControl]="prompt"></textarea>
+            <button class="send-button" (click)="send($event)" aria-label="Send message" [disabled]="waiting">
+              <mat-icon [inline]="'true'">send</mat-icon>
+            </button>
+          </div>
+        </mat-form-field>
+      </div>
+            
+</div>
