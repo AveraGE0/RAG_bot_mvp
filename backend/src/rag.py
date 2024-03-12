@@ -24,6 +24,7 @@ class RAG():
         logger.info(f"Loading dataset: {DATASET_NAME}")
         # test dataset from hugging face
         ds = datasets.load_dataset(DATASET_NAME, split="train")
+        ds = datasets.load_dataset("csv", data_files="./data/vu_dataset.csv", split="train")
         logger.info("Setting up vector database (FAISS)")
         self.vector_db_faiss = get_knowledge_base(embedding_model, ds)
         logger.info("RAG Setup is done!")
@@ -36,4 +37,4 @@ class RAG():
 
 
 if __name__ == '__main__':
-    rag()
+    rag = RAG()

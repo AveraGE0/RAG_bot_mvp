@@ -1,5 +1,4 @@
-from backend.src.config import EMBEDDING_MODEL_NAME, MARKDOWN_SEPARATORS
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from backend.src.config import EMBEDDING_MODEL_NAME, MARKDOWN_SEPARATORS, CHUNK_SIZE
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from transformers import AutoTokenizer
 from typing import Optional
@@ -31,6 +30,7 @@ def split_documents(
         add_start_index=True,
         strip_whitespace=True,
         separators=MARKDOWN_SEPARATORS,
+        is_separator_regex=True
     )
 
     docs_processed = []
@@ -73,7 +73,7 @@ def get_knowledge_base(embedding_model: HuggingFaceEmbeddings, dataset):
     #raw_knowledge_base = raw_knowledge_base[:10]
     print("Splitting Documents")
     docs_processed = split_documents(
-        256,  # We choose a chunk size adapted to our model
+        CHUNK_SIZE,  # We choose a chunk size adapted to our model
         raw_knowledge_base,
         tokenizer_name=EMBEDDING_MODEL_NAME,
     )

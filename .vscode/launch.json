@@ -15,6 +15,12 @@
             "type": "debugpy",
             "request": "launch",
             "module": "backend.src.rag"
+        },
+        {
+            "name": "Dataset creation",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "backend.src.dataset"
         }
     ]
 }
