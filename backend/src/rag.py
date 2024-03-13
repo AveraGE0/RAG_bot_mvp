@@ -2,7 +2,6 @@
 from backend.src.embedding import get_embedding_model
 from backend.src.database import get_knowledge_base
 from backend.src.config import EMBEDDING_MODEL_NAME, DATASET_NAME, DEVICE
-from backend.src.llm import LLM
 import backend.src.logger
 import datasets
 import torch
@@ -31,17 +30,19 @@ class RAG():
         self.vector_db_faiss = get_knowledge_base(embedding_model, ds)
         logger.info("Loading model...")
         self.prompt_in_chat_format = """
-            Context: {context}
-            ---
-            Using the information contained in the context, give a comprehensive but short answer to the question.
-            Respond only to the question asked, response should be concise and relevant to the question. Only use relevant documents.
-            In your answer, put the source corresponding to document you used for the answer at the end.
-            If the answer cannot be deduced from the context, give the following answer: I am sorry, I could not find an answer to
-            your question.
+                    Context: {context}
+                    ---
+                    Using the information contained in the context, give a short answer to the question.
+                    Respond only to the question asked, response should be concise and relevant to the question.
+                    In your answer, put the full source link corresponding to document you used for the answer at the end of the answer
+                    as in the following format Source: source link to document.
+                    If the answer cannot be deduced from the context, give the following answer: I am sorry, I could not find an answer to
+                    your question.
 
-            Now here is the question you need to answer.
-            Question: {question}
-        """
+                    Now here is the question you need to answer.
+                    Question: {question}
+                """
+        #<a href="link to source"></a>
         #self.llm = LLM(chat_template=self.prompt_in_chat_format)
         logger.info("Model loaded, warming model up!")
         #self.llm.prompt_model(query="Wakey, wakey, are you ready to give some dope answers?", context="", sources="")
@@ -64,7 +65,10 @@ class RAG():
     def get_prompt(self, query: str):
         answers = self.get_top_k_embeddings(query, 5)
         context = "\nExtracted documents:\n"
-        context += "".join([f"Document {str(i)}:::\n" + doc.page_content for i, doc in enumerate(answers)])
+        context += "".join([
+            f"Document {str(i)}:\n" + doc.page_content + f"\nSource {str(i)}: {doc.metadata['source']}" for i, doc in enumerate(answers)
+        ])
+        
         sources = "".join([f"Source {str(i)}:\n" + doc.metadata['source'] for i, doc in enumerate(answers)])
         return self.prompt_in_chat_format.format(question=query, context=context)
 
