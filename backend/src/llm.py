@@ -32,9 +32,9 @@ class LLM():
             max_new_tokens=500,
         )
         
-        self.prompt_template = self.tokenizer.apply_chat_template(
-            chat_template, tokenize=False, add_generation_prompt=True
-        )
+        #self.prompt_template = self.tokenizer.apply_chat_template(
+        #    chat_template, tokenize=False, add_generation_prompt=True
+        #)
 
     def prompt_model(self, query: str, context: str, sources: str) -> str:
         """model_inputs = self.tokenizer.encode(prompt, return_tensors="pt").to(DEVICE)
@@ -43,5 +43,5 @@ class LLM():
         generated_ids = self.model.generate(model_inputs, attention_mask=attention_mask, max_new_tokens=MAX_NEW_TOKENS)
         out = self.tokenizer.decode(generated_ids[0], skip_special_tokens=True)
         return out"""
-        final_prompt = self.prompt_template.format(question=query, context=context, sources=sources)
-        return self.READER_LLM(final_prompt)[0]["generated_text"]
+        #final_prompt = self.prompt_template.format(question=query, context=context, sources=sources)
+        #return self.READER_LLM(final_prompt)[0]["generated_text"]

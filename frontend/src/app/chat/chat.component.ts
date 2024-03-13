@@ -29,6 +29,7 @@ import { CommonModule } from '@angular/common';
 export class ChatComponent {
 
   constructor(private _apiService: ApiServiceService){};
+  liveChat = ""
   botName = "Digital Student Advisor";
   idCount = 0;
   prompt = new FormControl('');
@@ -55,7 +56,24 @@ export class ChatComponent {
     this.prompt.setValue('');
     this.waiting = true
     // API CALL HERE
-    this._apiService.getResponse(message)
+    this._apiService.askOllama(message).subscribe({
+      next: (chunk) => {
+        this.liveChat += chunk; // Append each received chunk to the chatContent variable
+      },
+      error: (error) => {
+        console.error(error);
+        this.waiting=false;
+        this.addMessage(this.liveChat, this.botName)
+        this.liveChat=""
+      },
+      complete: () => {
+        console.log('Stream completed');
+        this.waiting=false;
+        this.addMessage(this.liveChat, this.botName)
+        this.liveChat=""
+      },
+    });
+    /*this._apiService.getResponse(message)
       .subscribe({
         next: (res) => {
           console.log(res);
@@ -70,7 +88,7 @@ export class ChatComponent {
             this.waiting = false;
           }
         }
-      })
+      })*/
   }
 
   messages = [

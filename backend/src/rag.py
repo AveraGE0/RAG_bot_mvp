@@ -30,30 +30,21 @@ class RAG():
         logger.info("Setting up vector database (FAISS)")
         self.vector_db_faiss = get_knowledge_base(embedding_model, ds)
         logger.info("Loading model...")
-        prompt_in_chat_format = [
-            {
-                "role": "system",
-                "content": """Using the information contained in the context, give a comprehensive but short answer to the question.
-                Answer directly without introduction.
-                Respond only to the question asked, response should be concise and relevant to the question. Only use relevant documents.
-                In your answer, put the source corresponding to document you used for the answer at the end.
-                If the answer cannot be deduced from the context, give the following answer: I am sorry, I could not find an answer to
-                your question. Never give an empty query.""",
-            },
-            {
-                "role": "user",
-                "content": """
-                Context: {context}
-                ---
-                Sources: {sources}
-                ---
-                Now here is the question you need to answer.
-                Question: {question}""",
-            },
-        ]
-        self.llm = LLM(chat_template=prompt_in_chat_format)
+        self.prompt_in_chat_format = """
+            Context: {context}
+            ---
+            Using the information contained in the context, give a comprehensive but short answer to the question.
+            Respond only to the question asked, response should be concise and relevant to the question. Only use relevant documents.
+            In your answer, put the source corresponding to document you used for the answer at the end.
+            If the answer cannot be deduced from the context, give the following answer: I am sorry, I could not find an answer to
+            your question.
+
+            Now here is the question you need to answer.
+            Question: {question}
+        """
+        #self.llm = LLM(chat_template=self.prompt_in_chat_format)
         logger.info("Model loaded, warming model up!")
-        self.llm.prompt_model(query="Wakey, wakey, are you ready to give some dope answers?", context="", sources="")
+        #self.llm.prompt_model(query="Wakey, wakey, are you ready to give some dope answers?", context="", sources="")
         logger.info("Model is warmed up!")
         logger.info("RAG Setup is done!")
     
@@ -68,6 +59,14 @@ class RAG():
         for answer in answers:
             output += f"answer: {answer.page_content}, source: {answer.metadata['source']}\n"
         return output
+    
+    
+    def get_prompt(self, query: str):
+        answers = self.get_top_k_embeddings(query, 5)
+        context = "\nExtracted documents:\n"
+        context += "".join([f"Document {str(i)}:::\n" + doc.page_content for i, doc in enumerate(answers)])
+        sources = "".join([f"Source {str(i)}:\n" + doc.metadata['source'] for i, doc in enumerate(answers)])
+        return self.prompt_in_chat_format.format(question=query, context=context)
 
 
     def response_from_k_embeddings(self, query, k=5) -> str:
@@ -81,8 +80,8 @@ class RAG():
         context = "\nExtracted documents:\n"
         context += "".join([f"Document {str(i)}:::\n" + doc.page_content for i, doc in enumerate(answers)])
         sources = "".join([f"Source {str(i)}:\n" + doc.metadata['source'] for i, doc in enumerate(answers)])
-        answer = self.llm.prompt_model(query, context, sources)
-        return answer
+        #answer = self.llm.prompt_model(query, context, sources)
+        return "answer"
 
 
 if __name__ == '__main__':

@@ -16,6 +16,15 @@
             </p>
             <p [ngStyle]="{'align-self': (msg.src==botName) ? 'start' : 'end'}" class="message">{{msg.msg}}</p>
         }
+        @if(waiting){
+          <p class="content-owner" [ngStyle]="{'align-self': 'start'}">
+            <mat-icon [inline]="'true'">
+              adb
+            </mat-icon>
+            {{botName}}
+          </p>
+          <p [ngStyle]="{'align-self': 'start'}" class="message">{{liveChat}}</p>
+        }
     </div>
     <div class="input-container">
         <mat-form-field class="input-field">
