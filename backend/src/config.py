@@ -20,6 +20,6 @@ MARKDOWN_SEPARATORS = [
     " ",
     "",
 ]
-
+LLM_URL = "http://127.0.0.1:11434/api/generate"
 CHUNK_SIZE = 512
 MAX_NEW_TOKENS = 1000

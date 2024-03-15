@@ -1,15 +1,18 @@
-from flask import Flask, Response, request, jsonify
+from flask import Flask, Response, request, jsonify, make_response
 from markupsafe import escape
 from flask_cors import CORS
 from backend.src.rag import RAG
+from backend.src.config import LLM_URL
 import requests
 import json
-import re
+import logging
 
 __OK__ = 200
-__INTERNAL_ERROR__ = 400
+__INTERNAL_ERROR__ = 500
 __NOT_FOUND__ = 404 
 
+
+logger = logging.getLogger(__name__)
 
 rag = RAG()
 app = Flask(__name__)
@@ -31,7 +34,13 @@ def parse_request():
             "prompt": prompt,
             "keep_alive": 0
         }
-        response = requests.post("http://127.0.0.1:11434/api/generate", data=json.dumps(data), headers={'Content-Type': 'application/json'}, stream=True)
+        try:
+            response = requests.post(LLM_URL, data=json.dumps(data), headers={'Content-Type': 'application/json'}, stream=True)
+        except requests.exceptions.ConnectionError as e:
+            logger.error(f"Cannot reach the LLM on {LLM_URL}. Is the LLM server started?")
+            error_response = make_response('', __INTERNAL_ERROR__)
+            error_response.status = f"{__INTERNAL_ERROR__} Sorry, could not reach the LLM server."
+            return error_response
 
         if response.status_code == 200:
             # Define a generator function that yields chunks of data
@@ -42,7 +51,7 @@ def parse_request():
             return Response(generate(), content_type=response.headers['Content-Type'])
         else:
             return jsonify({'error': 'Failed to get response from Ollama API'}), response.status_code
-
+    	
         #return jsonify({"response": rag.get_top_k_embeddings(prompt)[0].page_content}), __OK__ #integrate to here
         return json_response, __OK__
 

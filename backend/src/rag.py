@@ -29,19 +29,18 @@ class RAG():
         logger.info("Setting up vector database (FAISS)")
         self.vector_db_faiss = get_knowledge_base(embedding_model, ds)
         logger.info("Loading model...")
-        self.prompt_in_chat_format = """
-                    Context: {context}
-                    ---
-                    Using only the information contained in the context, give a short answer to the question.
-                    Respond only to the question asked, the response should be concise and relevant to the question.
-                    In your answer, put the full source link without html tags corresponding to document you used for the answer.
-                    Put the links at the end of the answer as a full link to the document.
-                    If the answer cannot be deduced from the context, give the following answer: I am sorry, I could not find an answer to
-                    your question.
-
-                    Now here is the question you need to answer.
-                    Question: {question}
-                """
+        self.prompt_in_chat_format = """Context: {context}
+---
+Using only the information contained in the context, give a short answer to the question.
+Respond only to the question asked, the response should be concise and relevant to the question.
+In your answer, put the full source link without html tags corresponding to document you used for the answer.
+Put the links at the end of the answer as a full link to the document ONLY for the relevant context.
+If the answer cannot be deduced from the context, give the following answer: I am sorry, I could not find an answer to
+your question.
+---
+Now here is the question you need to answer.
+Question: {question}
+"""
         logger.info("Model loaded, warming model up!")
         logger.info("Model is warmed up!")
         logger.info("RAG Setup is done!")

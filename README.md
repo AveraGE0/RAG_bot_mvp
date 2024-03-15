@@ -23,12 +23,13 @@ Make sure the backend is run from the project directory, so one folder above the
 You can serve the frontend with docker.
 For this purpose you have to install docker on your PC. Once this is done run (in the frontend dir)
 ```
-docker build -t bot_mvp .
+docker build -f frontend.dockerfile -t bot_mvp-frontend .
+docker build -f backend.dockerfile -t bot_mvp-backend .
 ```
 in the console. This sets up the docker container.
 To run the docker container, simply run 
 ```
-docker run -p 127.0.0.1:8000:80 bot_mvp
+docker run -p 127.0.0.1:8000:80 -p 127.0.0.1:bot_mvp
 ```
 
 
