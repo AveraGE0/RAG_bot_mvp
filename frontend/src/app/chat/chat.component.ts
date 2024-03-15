@@ -12,6 +12,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { LinkifyPipe } from '../linkify.pipe';
+import { HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-chat',
@@ -38,19 +39,18 @@ export class ChatComponent {
   prompt = new FormControl('');
   waiting = false;
 
-  addMessage(message: string, src: string){
-    let mgs = {id: this.idCount, msg: message, src: src}
-
-    this.idCount += 1
-    this.messages.push(mgs)
-  }
-
-  send(event: MouseEvent): void {
-    event.stopPropagation(); // Stops the click event from reaching the input field
+  @HostListener('document:keydown.enter', ['$event'])
+  onEnterPressed(event: KeyboardEvent) {
+    event.preventDefault(); // Prevents the default action (e.g., adding a new line in the textarea)
+    event.stopPropagation();
     let message = this.prompt.value ? this.prompt.value: "";
-    if(message === ""){
+    if(this.waiting || message === ""){
       return
     }
+    this.sendPrompt(message)
+  }
+
+  sendPrompt(message: string): void{
     console.log("sending message to bot: ", message)
     if( !this.prompt.value){
       this.prompt.setValue("")
@@ -64,34 +64,36 @@ export class ChatComponent {
         this.liveChat += chunk; // Append each received chunk to the chatContent variable
       },
       error: (error) => {
+        console.log("caught error")
         console.error(error);
         this.waiting=false;
-        this.addMessage(this.liveChat, this.botName)
+        this.addMessage(error.message, this.botName)
         this.liveChat=""
       },
       complete: () => {
         console.log('Stream completed');
         this.waiting=false;
+        console.log(this.liveChat)
         this.addMessage(this.liveChat, this.botName)
         this.liveChat=""
       },
     });
-    /*this._apiService.getResponse(message)
-      .subscribe({
-        next: (res) => {
-          console.log(res);
-          let response = res.response ? res.response: "";
-          this.addMessage(response, this.botName);
-          this.waiting = false;
-        },
-        error: (e) => {
-          console.log(e)
-          if(e.status==0){
-            this.addMessage("Error, could not get response :(", this.botName);
-            this.waiting = false;
-          }
-        }
-      })*/
+  }
+
+  addMessage(message: string, src: string){
+    let mgs = {id: this.idCount, msg: message, src: src}
+
+    this.idCount += 1
+    this.messages.push(mgs)
+  }
+
+  send(event: MouseEvent): void {
+    event.stopPropagation(); // Stops the click event from reaching the input field
+    let message = this.prompt.value ? this.prompt.value: "";
+    if(message === ""){
+      return
+    }
+    this.sendPrompt(message)
   }
 
   messages: {id: number, msg: string, src: string}[] = [

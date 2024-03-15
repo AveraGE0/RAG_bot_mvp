@@ -10,7 +10,8 @@ export class LinkifyPipe implements PipeTransform {
 
   transform(text: string): SafeHtml {
     if (!text) return '';
-    const transformedText = text.replace(/(https?:\/\/[^\s]+)/g, url => `<a href="${url}" target="_blank">${url}</a>`);
+    text = text.replace(/[<>]/g, '');
+    const transformedText = text.replace(/(https?:\/\/[^\s]+)/g, url => `<a href="${url}" target="_blank">link</a>`);
     return this.sanitizer.bypassSecurityTrustHtml(transformedText);
   }
 }

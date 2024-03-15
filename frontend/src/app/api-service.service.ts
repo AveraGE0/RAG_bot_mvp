@@ -29,6 +29,9 @@ export class ApiServiceService {
         body: JSON.stringify({prompt: question}),
       })
       .then((response) => {
+        if(response.status == 500){
+            throw Error(response.statusText);
+        }
         const reader = response.body?.getReader();
         const decoder = new TextDecoder("utf-8");
         const read = () => {
@@ -39,16 +42,17 @@ export class ApiServiceService {
             }
             const text = decoder.decode(value);
             try {
-              console.log(text)
+              //console.log(text)
               const messages = text.trim().split('\n');
               for(let message of messages){
                 const jsonObj = JSON.parse(message); // Parse the text as JSON
                 observer.next(jsonObj.response); // Emit the specific value
               }
             } catch (error) {
-              console.log("Erroneous text:")
+              console.log("Skipping Erroneous text:")
               console.log(text)
-              observer.error(`Error parsing JSON: ${error}`);
+              observer.complete()
+              //observer.error(`Error parsing JSON: ${error}`);
               return;
             }
             read(); // Read the next chunk
