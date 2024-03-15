@@ -4,6 +4,7 @@ from flask_cors import CORS
 from backend.src.rag import RAG
 import requests
 import json
+import re
 
 __OK__ = 200
 __INTERNAL_ERROR__ = 400
@@ -13,7 +14,7 @@ __NOT_FOUND__ = 404
 rag = RAG()
 app = Flask(__name__)
 # allow cross-origin requests
-cors = CORS(app, resources={r"/bot": {"origins": "*"}})
+cors = CORS(app, resources={r"*": {"origins": "*"}})
 
 @app.route("/bot", methods=['POST'])
 def parse_request():
@@ -35,7 +36,7 @@ def parse_request():
         if response.status_code == 200:
             # Define a generator function that yields chunks of data
             def generate():
-                for chunk in response.iter_content(chunk_size=4096):
+                for chunk in response.iter_content(chunk_size=8096):
                     yield chunk
             # Stream the response back to the client
             return Response(generate(), content_type=response.headers['Content-Type'])
@@ -47,4 +48,4 @@ def parse_request():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=5000)

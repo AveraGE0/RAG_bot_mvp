@@ -9,6 +9,11 @@ import matplotlib.pyplot as plt
 from langchain_community.vectorstores import FAISS
 from langchain_community.vectorstores.utils import DistanceStrategy
 from langchain_community.embeddings import HuggingFaceEmbeddings
+from urllib.parse import urlparse
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def split_documents(
@@ -71,13 +76,26 @@ def get_knowledge_base(embedding_model: HuggingFaceEmbeddings, dataset):
         LangchainDocument(page_content=doc["text"], metadata={"source": doc["source"]}) for doc in tqdm(dataset)
     ]
     #raw_knowledge_base = raw_knowledge_base[:10]
-    print("Splitting Documents")
+    verify_sources([doc.metadata["source"] for doc in raw_knowledge_base])
+    logger.info(f"Database contains {len(raw_knowledge_base)} documents")
+    logger.info("Splitting Documents")
     docs_processed = split_documents(
         CHUNK_SIZE,  # We choose a chunk size adapted to our model
         raw_knowledge_base,
         tokenizer_name=EMBEDDING_MODEL_NAME,
     )
-    print("Generating Embeddings")
+    logger.info("Generating Embeddings")
     return FAISS.from_documents(
         docs_processed, embedding_model, distance_strategy=DistanceStrategy.COSINE
     )
+
+def verify_sources(sources: list):
+    """Simple function that checks if a link is in a valid format.
+    Because it happened a lot in the database, any link containing
+    two or more consecutive dots is not considered valid.
+
+    Args:
+        sources (list): a list of potential links
+    """
+    valid = [bool(urlparse(url).scheme and urlparse(url) and ('..' not in url)) for url in sources]
+    logger.info(f"Database contains {sum(valid)}/{len(sources)} valid links!")
