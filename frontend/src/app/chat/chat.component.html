@@ -14,7 +14,7 @@
               </mat-icon>
               {{msg.src}}
             </p>
-            <p [ngStyle]="{'align-self': (msg.src==botName) ? 'start' : 'end'}" class="message">{{msg.msg}}</p>
+            <p [ngStyle]="{'align-self': (msg.src==botName) ? 'start' : 'end'}" class="message" [innerHTML]="msg.msg | linkify"></p>
         }
         @if(waiting){
           <p class="content-owner" [ngStyle]="{'align-self': 'start'}">
@@ -27,14 +27,12 @@
         }
     </div>
     <div class="input-container">
-        <mat-form-field class="input-field">
-          <div class="highlight">
-            <textarea placeholder="Type your message here" [formControl]="prompt"></textarea>
-            <button class="send-button" (click)="send($event)" aria-label="Send message" [disabled]="waiting">
-              <mat-icon [inline]="'true'">send</mat-icon>
-            </button>
-          </div>
-        </mat-form-field>
+        <div class="highlight">
+          <textarea placeholder="Type your message here" [formControl]="prompt"></textarea>
+          <button class="send-button" (click)="send($event)" aria-label="Send message" [disabled]="waiting">
+            <mat-icon [inline]="'true'" style="padding-top: 25%;">send</mat-icon>
+          </button>
+        </div>
       </div>
             
 </div>

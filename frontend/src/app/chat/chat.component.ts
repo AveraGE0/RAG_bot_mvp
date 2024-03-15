@@ -10,6 +10,8 @@ import { ApiServiceService } from '../api-service.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { LinkifyPipe } from '../linkify.pipe';
 
 @Component({
   selector: 'app-chat',
@@ -22,13 +24,14 @@ import { CommonModule } from '@angular/common';
     MatDividerModule,
     ReactiveFormsModule,
     CommonModule,
+    LinkifyPipe,
   ],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
 })
 export class ChatComponent {
 
-  constructor(private _apiService: ApiServiceService){};
+  constructor(private _apiService: ApiServiceService, private sanitizer: DomSanitizer){};
   liveChat = ""
   botName = "Digital Student Advisor";
   idCount = 0;
@@ -91,7 +94,7 @@ export class ChatComponent {
       })*/
   }
 
-  messages = [
+  messages: {id: number, msg: string, src: string}[] = [
     {id: 0, msg: "This is the digital student advisor! How may I help you?😏", src: this.botName}
     /*{id: 1, msg: "HI there", src: "You"},
     {id: 2, msg: "Hello, i am bot", src: "Digital Study Advisor"},

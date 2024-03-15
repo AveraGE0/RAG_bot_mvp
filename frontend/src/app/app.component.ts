@@ -5,6 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
+import { LinkifyPipe } from './linkify.pipe';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +15,7 @@ import { CommonModule } from '@angular/common';
     ChatComponent,
     HttpClientModule,
     CommonModule,
+    LinkifyPipe // Add LinkifyPipe to the module's declarations
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'

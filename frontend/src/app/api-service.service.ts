@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { BotResponse } from './models/botresponse.model';
 
-const baseUrl = 'http://localhost:5000/bot';
+const baseUrl =  'http://192.168.178.14:5000/bot' // 'http://localhost:5000/bot';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +16,11 @@ export class ApiServiceService {
     return this.http.post<BotResponse>(`${baseUrl}`, body);
   }
 
+  cleanMessage(message: string) {
+    // Example: simplistic approach to escaping quotes
+    return message.replace(/[\n\r]+/g, '').trim(); // Adjust according to the specifics of your data
+  }
+
   askOllama(question: string): Observable<string> {
     return new Observable((observer) => {
       fetch(baseUrl, {
@@ -25,7 +30,7 @@ export class ApiServiceService {
       })
       .then((response) => {
         const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
+        const decoder = new TextDecoder("utf-8");
         const read = () => {
           reader?.read().then(({ done, value }) => {
             if (done) {
@@ -34,10 +39,15 @@ export class ApiServiceService {
             }
             const text = decoder.decode(value);
             try {
-              const jsonObj = JSON.parse(text); // Parse the text as JSON
-              const specificValue = jsonObj.response; // Replace 'yourKey' with the actual key you're interested in
-              observer.next(specificValue); // Emit the specific value
+              console.log(text)
+              const messages = text.trim().split('\n');
+              for(let message of messages){
+                const jsonObj = JSON.parse(message); // Parse the text as JSON
+                observer.next(jsonObj.response); // Emit the specific value
+              }
             } catch (error) {
+              console.log("Erroneous text:")
+              console.log(text)
               observer.error(`Error parsing JSON: ${error}`);
               return;
             }
